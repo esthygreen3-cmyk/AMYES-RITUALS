@@ -32,28 +32,54 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      console.warn('localStorage getItem blocked or unavailable:', e);
+      return null;
+    }
+  },
+  setItem: (key: string, value: string): void => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      console.warn('localStorage setItem blocked or unavailable:', e);
+    }
+  }
+};
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Multilingual State (FR by default)
   const [lang, setLang] = useState<'fr' | 'en'>(() => {
-    const saved = localStorage.getItem('amyes_lang');
+    const saved = safeLocalStorage.getItem('amyes_lang');
     return (saved === 'en' || saved === 'fr') ? saved : 'fr';
   });
 
   // Dark Mode State (false by default for light luxury)
   const [darkMode, setDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('amyes_dark');
+    const saved = safeLocalStorage.getItem('amyes_dark');
     return saved === 'true';
   });
 
   // Shopping Cart & Wishlist lists
   const [cart, setCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem('amyes_cart');
-    return saved ? JSON.parse(saved) : [];
+    const saved = safeLocalStorage.getItem('amyes_cart');
+    try {
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
   });
 
   const [wishlist, setWishlist] = useState<string[]>(() => {
-    const saved = localStorage.getItem('amyes_wishlist');
-    return saved ? JSON.parse(saved) : [];
+    const saved = safeLocalStorage.getItem('amyes_wishlist');
+    try {
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
   });
 
   // Filters, search & modals
@@ -69,11 +95,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Sync to localStorages
   useEffect(() => {
-    localStorage.setItem('amyes_lang', lang);
+    safeLocalStorage.setItem('amyes_lang', lang);
   }, [lang]);
 
   useEffect(() => {
-    localStorage.setItem('amyes_dark', String(darkMode));
+    safeLocalStorage.setItem('amyes_dark', String(darkMode));
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {
@@ -82,11 +108,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [darkMode]);
 
   useEffect(() => {
-    localStorage.setItem('amyes_cart', JSON.stringify(cart));
+    safeLocalStorage.setItem('amyes_cart', JSON.stringify(cart));
   }, [cart]);
 
   useEffect(() => {
-    localStorage.setItem('amyes_wishlist', JSON.stringify(wishlist));
+    safeLocalStorage.setItem('amyes_wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
   // Actions

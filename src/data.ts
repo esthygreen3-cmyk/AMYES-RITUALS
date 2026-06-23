@@ -1,4 +1,6 @@
 import { Product, Review, Article } from './types';
+// @ts-ignore
+import sacredSerumGlowImg from './assets/images/sacred_serum_glow_1782227930236.jpg';
 
 export const PRODUCTS: Product[] = [
   {
@@ -9,7 +11,7 @@ export const PRODUCTS: Product[] = [
     price: 49,
     rating: 4.9,
     reviewsCount: 124,
-    image: 'https://images.unsplash.com/photo-1608248597481-496100c8c836?auto=format&fit=crop&w=600&q=80',
+    image: sacredSerumGlowImg,
     isNew: false,
     isBestseller: true,
     volume: '30 ml',
